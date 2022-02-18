@@ -8,10 +8,10 @@ def test_version():
 
 def test_convnet():
     net = nescient.ConvNet()
-    x = torch.rand(1, 1, 256, 256)
+    x = torch.rand(16)
     net.forward(x)
 
 
 def test_wrapper():
     net = nescient.ConvNetWrapper()
-    infer()
+    net.infer()
