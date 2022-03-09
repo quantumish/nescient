@@ -15,7 +15,7 @@ def test_train_sanity():
     """Model sanity check: make sure the model is able to train at all."""
     net = nescient.ConvNet()
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001)
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
     i = torch.rand(1,1,512,512)
     label = torch.tensor([[0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]])
     outputs = net(i)
@@ -33,6 +33,19 @@ def test_train_well_sanity():
     """Model sanity check: make sure the model can train to near zero loss on a single datapoint."""
     loss = test_train_sanity()
     assert(loss.item() < 0.01)
+
+def test_train_epoch():
+    net = nescient.ConvNet()
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
+    it = nescient.DataIterator("./tests/data.csv", "~/aux")    
+    for i in it:
+        optimizer.zero_grad()
+        outputs = net(i[0])
+        loss = criterion(outputs, i[1])
+        loss.backward()
+        optimizer.step()
+    
     
 def test_wrapper():
     """Test if a ConvNetWrapper can be instantiated and forward propagated."""

@@ -7,8 +7,23 @@ import numpy as np
 import torch
 from torch import nn
 import crypten
+from PIL import Image
+from torchvision.transforms import ToTensor
 
+class DataIterator():
+    def __init__(self, csv_path: str, data_folder: str):
+        self.file = open(path ,"r")
+    
+    def __iter__(self):
+        next(self.file) # skip header line
+        return self
 
+    def __next__(self):
+        line = next(self.file).split(",")
+        image = ToTensor()(Image.open(self.data_folder+'/'+line[0]))
+        label = torch.tensor([[i for i in line[6:]]])
+        return (image, label)
+            
 class ConvNet(torch.nn.Module):
     """Simple conv net for classification of chest X rays."""
     def __init__(self):
