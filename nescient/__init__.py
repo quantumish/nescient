@@ -49,18 +49,29 @@ class ConvNet(torch.nn.Module):
     def __init__(self):
         """Initialize the model."""
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 1, (64, 64))
-        self.conv2 = nn.Conv2d(1, 1, (32, 32))
-        self.conv3 = nn.Conv2d(1, 1, (16, 16), stride=4)
-        self.conv4 = nn.Conv2d(1, 1, (4, 4), stride=2)
-        self.linear = nn.Linear(850, 512)
-        self.linear1 = nn.Linear(512, 256)
-        self.linear2 = nn.Linear(256, 256)
-        self.linear3 = nn.Linear(256, 128)
-        self.linear4 = nn.Linear(128, 64)
-        self.linear5 = nn.Linear(64, 64)
-        self.linear6 = nn.Linear(64, 32)
-        self.out = nn.Linear(32, 14)
+        self.model = nn.Sequential(            
+            nn.Conv2d(1, 1, (64, 64)),
+            nn.Conv2d(1, 1, (32, 32)),
+            nn.Conv2d(1, 1, (16, 16), stride=4),
+            nn.Conv2d(1, 1, (4, 4), stride=2),
+            nn.Flatten(),
+            nn.Linear(850, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.Sigmoid(),
+            nn.Linear(64, 64),
+            nn.Sigmoid(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, 14),
+            nn.Softmax(dim=1)
+        )
 
     def forward(self, x):
         """
@@ -69,20 +80,8 @@ class ConvNet(torch.nn.Module):
         Arguments:
         - x: a (1, 1, 512, 512) grayscale image.
         """
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = self.linear(torch.flatten(x, 1))
-        x = self.linear1(x)
-        x = self.linear2(x)
-        x = self.linear3(x)
-        x = self.linear4(x)
-        x = self.linear5(x)
-        x = self.linear6(x)
-        return self.out(x)
-
-
+        return self.model(x)
+        
 class ConvNetWrapper:
     """Wrap a ConvNet() into an encrypted model."""
 

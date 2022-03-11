@@ -43,22 +43,32 @@ def test_train_well_sanity():
 def test_train_epoch():
     net = nescient.ConvNet()
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.1)
     print()
     for n in range(100): 
         it = nescient.DataIterator(
              "/home/quantumish/aux/CheXpert-v1.0-small/train.csv", "/home/quantumish/aux"
         )
-        for i in islice(it, 100):
-            if (i == None):
+        iters = 0
+        max_iters = 10
+        losses = []
+        for i in it:
+            if i == None:
                 continue
+            if (iters > max_iters):
+                break
             optimizer.zero_grad()
             outputs = net(i[0])
             loss = criterion(outputs, i[1])
+            losses.append(loss.item())
+            # print("Iteration {}/{} (running avg. loss {})".format(iters, max_iters, sum(losses)/(iters+1)), end='\n' if iters == max_iters else '\r')
+            # print("{}\n{}\n{}\n\n".format(outputs.tolist(), i[1].tolist(), loss.item()))
             loss.backward()
             optimizer.step()
-        print("Epoch {}/100: {}".format(n, loss.item()))
+            iters += 1
+        print("Epoch {}/100: avg. loss of {}".format(n, sum(losses)/max_iters))
     print(loss.item())
+    assert(1 == 0)
 
 
 def test_wrapper():
