@@ -49,10 +49,18 @@ class ConvNet(torch.nn.Module):
     def __init__(self):
         """Initialize the model."""
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 1, (32, 32), stride=4)
-        self.conv2 = nn.Conv2d(1, 1, (4, 4), stride=2)
-        self.linear = nn.Linear(1786, 120)
-        self.out = nn.Linear(120, 14)
+        self.conv1 = nn.Conv2d(1, 1, (64, 64))
+        self.conv2 = nn.Conv2d(1, 1, (32, 32))
+        self.conv3 = nn.Conv2d(1, 1, (16, 16), stride=4)
+        self.conv4 = nn.Conv2d(1, 1, (4, 4), stride=2)
+        self.linear = nn.Linear(850, 512)
+        self.linear1 = nn.Linear(512, 256)
+        self.linear2 = nn.Linear(256, 256)
+        self.linear3 = nn.Linear(256, 128)
+        self.linear4 = nn.Linear(128, 64)
+        self.linear5 = nn.Linear(64, 64)
+        self.linear6 = nn.Linear(64, 32)
+        self.out = nn.Linear(32, 14)
 
     def forward(self, x):
         """
@@ -63,7 +71,15 @@ class ConvNet(torch.nn.Module):
         """
         x = self.conv1(x)
         x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
         x = self.linear(torch.flatten(x, 1))
+        x = self.linear1(x)
+        x = self.linear2(x)
+        x = self.linear3(x)
+        x = self.linear4(x)
+        x = self.linear5(x)
+        x = self.linear6(x)
         return self.out(x)
 
 

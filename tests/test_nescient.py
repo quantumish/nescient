@@ -44,6 +44,7 @@ def test_train_epoch():
     net = nescient.ConvNet()
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
+    print()
     for n in range(100): 
         it = nescient.DataIterator(
              "/home/quantumish/aux/CheXpert-v1.0-small/train.csv", "/home/quantumish/aux"
