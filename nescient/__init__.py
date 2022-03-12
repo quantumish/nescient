@@ -34,12 +34,11 @@ class DataIterator:
 
         def sketchy_float(i):
             try:
-                f = float(i)
-                return 0.0 if f == -1.0 else f
+                return float(i)
             except:
-                return 0.5
+                return 0.0
 
-        label = torch.tensor([[0.5 if i == '' else sketchy_float(i) for i in line[5:]]])
+        label = torch.tensor([[0.0 if i == '' else sketchy_float(i) for i in line[5:]]])
         return (image, label)
 
 
@@ -70,7 +69,6 @@ class ConvNet(torch.nn.Module):
             nn.Linear(64, 32),
             nn.ReLU(),
             nn.Linear(32, 14),
-            nn.Softmax(dim=1)
         )
 
     def forward(self, x):

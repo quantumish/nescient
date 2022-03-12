@@ -18,7 +18,7 @@ def test_convnet():
 def test_train_sanity():
     """Model sanity check: make sure the model is able to train at all."""
     net = nescient.ConvNet()
-    criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.MSELoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
     i = torch.rand(1, 1, 512, 512)
     label = torch.tensor([[0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]])
@@ -42,8 +42,8 @@ def test_train_well_sanity():
 
 def test_train_epoch():
     net = nescient.ConvNet()
-    criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
     print()
     for n in range(100):
         it = nescient.DataIterator(
@@ -58,14 +58,14 @@ def test_train_epoch():
             # print(i[0])
             if iters > max_iters:
                 break
-            optimizer.zero_grad()
             outputs = net(i[0])
             loss = criterion(outputs, i[1])
             losses.append(loss.item())
             # print("Iteration {}/{} (running avg. loss {})".format(iters, max_iters, sum(losses)/(iters+1)), end='\n' if iters == max_iters else '\r')
-            print("{}\n{}\n{}\n\n".format(outputs.tolist(), i[1].tolist(), loss.item()))
+            # print("{}\n{}\n{}\n\n".format(outputs.tolist(), i[1].tolist(), loss.item()))
             loss.backward()
             optimizer.step()
+            optimizer.zero_grad()
             iters += 1
         print("Epoch {}/100: avg. loss of {}".format(n, sum(losses) / (max_iters + 1)))
     print(loss.item())
