@@ -24,7 +24,7 @@ class DataIterator:
         # print(raw_image.size, line[0])
         if raw_image.size != (320, 390):
             # print("Skipping!")
-            return None        
+            return None
         image = torch.tensor(
             [numpy.array(
                 (Image.open(self.data_folder + "/" + line[0])).getdata(),
@@ -34,12 +34,12 @@ class DataIterator:
 
         def sketchy_float(i):
             try:
-                return float(i)
+                f = float(i)
+                return 0.0 if f == -1.0 else f
             except:
-                return 0.0
+                return 0.5
 
-            
-        label = torch.tensor([[0 if i == '' else sketchy_float(i) for i in line[5:]]])
+        label = torch.tensor([[0.5 if i == '' else sketchy_float(i) for i in line[5:]]])
         return (image, label)
 
 
@@ -49,13 +49,13 @@ class ConvNet(torch.nn.Module):
     def __init__(self):
         """Initialize the model."""
         super().__init__()
-        self.model = nn.Sequential(            
-            nn.Conv2d(1, 1, (64, 64)),
-            nn.Conv2d(1, 1, (32, 32)),
-            nn.Conv2d(1, 1, (16, 16), stride=4),
-            nn.Conv2d(1, 1, (4, 4), stride=2),
+        self.model = nn.Sequential(
+            nn.Conv2d(1, 5, (64, 64)),
+            nn.Conv2d(5, 5, (32, 32)),
+            nn.Conv2d(5, 5, (16, 16), stride=4),
+            nn.Conv2d(5, 5, (4, 4), stride=2),
             nn.Flatten(),
-            nn.Linear(850, 512),
+            nn.Linear(850*5, 512),
             nn.ReLU(),
             nn.Linear(512, 256),
             nn.ReLU(),
@@ -81,7 +81,7 @@ class ConvNet(torch.nn.Module):
         - x: a (1, 1, 512, 512) grayscale image.
         """
         return self.model(x)
-        
+
 class ConvNetWrapper:
     """Wrap a ConvNet() into an encrypted model."""
 
