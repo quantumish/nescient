@@ -13,9 +13,9 @@ class DataIterator:
     def __init__(self, csv_path: str, data_folder: str):
         self.data_folder = data_folder
         self.file = open(csv_path, "r")
+        next(self.file)
 
-    def __iter__(self):
-        next(self.file)  # skip header line
+    def __iter__(self):        
         return self
 
     def __next__(self):
@@ -76,7 +76,7 @@ class ConvNet(torch.nn.Module):
         Forward propagates the model.
 
         Arguments:
-        - x: a (1, 1, 512, 512) grayscale image.
+        - x: a (1, 1, 320, 390) grayscale image.
         """
         return self.model(x)
 
@@ -90,17 +90,23 @@ class ConvNetWrapper:
 
         Arguments:
         - model: a ConvNet
+
+        Example:
+        >>> import nescient
+        >>> net = nescient.ConvNet()
+        >>> # do things...
+        >>> encrypted_net = nescient.ConvNetWrapper(net)
         """
         self.graph = crypten.nn.from_pytorch(
             model,
-            torch.rand(1, 1, 512, 512),
+            torch.rand(1, 1, 320, 390),
         ).encrypt()
 
     def encrypted_infer(self, x):
         """Peforms encrypted inference on an input.
 
         Argument:
-        - x: a (1, 1, 512, 512) black and white image.
+        - x: a (1, 1, 320, 390) black and white image.
         """
         self.graph.forward(x)
 
