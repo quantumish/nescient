@@ -1,8 +1,9 @@
 """Library for encrypted classification of images."""
 __version__ = "0.1.0"
 
+import math
+
 import crypten
-import numpy as np
 import pandas as pd
 import torch
 from PIL import Image
@@ -21,7 +22,7 @@ class CheXpertDataset(Dataset):
         - `data_folder`: path to the overarching dataset folder.
         """
         self.data_folder = data_folder
-        self.data = pd.read_csv(csv_path)        
+        self.data = pd.read_csv(csv_path)
 
     def __len__(self):
         """Get the size of the dataset - aka the number of images."""
@@ -39,22 +40,16 @@ class CheXpertDataset(Dataset):
         image = image.reshape(1, raw_image.size[0], raw_image.size[1])
         if raw_image.size[0] > raw_image.size[1]:
             image = torch.transpose(image, 1, 2)
-        image = nn.functional.pad(image, (0, 390-image.shape[2]), mode="replicate")        
-
-        def sketchy_float(i):
-            try:
-                return float(i)
-            except:
-                return 0.0
-
-        label = torch.tensor([[0.0 if i == np.nan else sketchy_float(i) for i in row[5:]]])
+        image = nn.functional.pad(image, (0, 390-image.shape[2]), mode="replicate")
+        label = [float(i) for i in row[5:]] 
+        label = torch.tensor([[0.0 if math.isnan(i) else float(i) for i in label]])
         return (image, label)
 
 
 class ConvNet(torch.nn.Module):
     """Simple conv net for classification of chest X rays."""
 
-    def __init__(self):
+    def __init__(self, batch_size):
         """Initialize the model."""
         super().__init__()
         self.model = nn.Sequential(
@@ -63,7 +58,7 @@ class ConvNet(torch.nn.Module):
             nn.Conv2d(5, 5, (16, 16), stride=4),
             nn.Conv2d(5, 5, (4, 4), stride=2),
             nn.Flatten(),
-            nn.Linear(850*5, 512),
+            nn.Linear(850, 512),
             nn.ReLU(),
             nn.Linear(512, 256),
             nn.ReLU(),
@@ -86,13 +81,13 @@ class ConvNet(torch.nn.Module):
         Arguments:
         - x: a (1, 1, 320, 390) grayscale image.
         """
-        return self.model(x).reshape(5,14)
+        return self.model(x)
 
 
 class ConvNetWrapper:
     """Wrap a ConvNet() into an encrypted model."""
 
-    def __init__(self, model=ConvNet()):
+    def __init__(self, model=ConvNet(10)):
         """Initialize the ConvNetWrapper.
 
         Uses either the default constructor of ConvNet or an existing ConvNet.
