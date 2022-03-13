@@ -2,15 +2,16 @@
 __version__ = "0.1.0"
 
 import crypten
-import numpy
+import numpy as np
+import pandas as pd
 import torch
 from PIL import Image
 from torch import nn
-from torchvision.transforms import ToTensor
+from torch.utils.data import Dataset
 
 
-class DataIterator:
-    """Iterator over the CheXpert dataset."""
+class CheXpertDataset(Dataset):
+    """CheXpert dataset."""
 
     def __init__(self, csv_path: str, data_folder: str):
         """Initialize iterator.
@@ -20,40 +21,33 @@ class DataIterator:
         - `data_folder`: path to the overarching dataset folder.
         """
         self.data_folder = data_folder
-        self.file = open(csv_path, "r")
-        next(self.file)
+        self.data = pd.read_csv(csv_path)        
 
-    def __iter__(self):
-        """Get an iterator from self.
+    def __len__(self):
+        """Get the size of the dataset - aka the number of images."""
+        return self.data.shape[0]
 
-        Mostly for maintaining compatibility with Python interfaces.
+    def __getitem__(self, n):
+        """Get nth (image, label) pair from dataset.
+
+        Returns: a tuple of a 1x1x320x390 PyTorch tensor and a 1x14 PyTorch tensor.
         """
-        return self
-
-    def __next__(self):
-        """Get next (image, label) pair from dataset.
-
-        Processes a line of the train.csv, reads the associated image,
-        and returns it as well as its labels.
-
-        Returns: a tuple of a 1x1x320x390 PyTorch tensor and a 1x14
-        PyTorch tensor.
-        """
-        line = next(self.file).split(",")
-        raw_image = Image.open(self.data_folder + "/" + line[0])
-        if raw_image.size != (320, 390):            
-            return None
+        row = self.data.iloc[n, :]
+        raw_image = Image.open("{}/{}".format(self.data_folder, row[0]))
         data = raw_image.getdata()
-        image = torch.FloatTensor(data)
-        image = image.reshape(1, 1, 320, 390)
-        
+        image = torch.FloatTensor([data])
+        image = image.reshape(1, raw_image.size[0], raw_image.size[1])
+        if raw_image.size[0] > raw_image.size[1]:
+            image = torch.transpose(image, 1, 2)
+        image = nn.functional.pad(image, (0, 390-image.shape[2]), mode="replicate")        
+
         def sketchy_float(i):
             try:
                 return float(i)
             except:
                 return 0.0
 
-        label = torch.tensor([[0.0 if i == '' else sketchy_float(i) for i in line[5:]]])
+        label = torch.tensor([[0.0 if i == np.nan else sketchy_float(i) for i in row[5:]]])
         return (image, label)
 
 
@@ -92,7 +86,7 @@ class ConvNet(torch.nn.Module):
         Arguments:
         - x: a (1, 1, 320, 390) grayscale image.
         """
-        return self.model(x)
+        return self.model(x).reshape(5,14)
 
 
 class ConvNetWrapper:
