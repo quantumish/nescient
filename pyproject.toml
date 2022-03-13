@@ -9,6 +9,7 @@ python = "3.9"
 torch = "^1.10.2"
 torchvision = "^0.11.3"
 crypten = "^0.4.0"
+Pillow-SIMD = "^9.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

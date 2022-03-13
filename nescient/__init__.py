@@ -44,7 +44,7 @@ class DataIterator:
         if raw_image.size != (320, 390):            
             return None
         data = raw_image.getdata()
-        image = torch.tensor(data, dtype=torch.float32)
+        image = torch.FloatTensor(data)
         image = image.reshape(1, 1, 320, 390)
         
         def sketchy_float(i):

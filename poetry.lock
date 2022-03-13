@@ -613,6 +613,14 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "pillow-simd"
+version = "9.0.0.post1"
+description = "Python Imaging Library (Fork)"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "platformdirs"
 version = "2.5.1"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
@@ -1150,7 +1158,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9"
-content-hash = "1f12866dc4076198a2b724c37328b2c7faa6355def6faadabe02e066901a50a6"
+content-hash = "a64d54ce252bb0c5fa7e1d0fa76e76a5c474b7c9b2c20b047b6be5f538118a39"
 
 [metadata.files]
 absl-py = [
@@ -1620,6 +1628,9 @@ pillow = [
     {file = "Pillow-9.0.1-pp37-pypy37_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6295f6763749b89c994fcb6d8a7f7ce03c3992e695f89f00b741b4580b199b7e"},
     {file = "Pillow-9.0.1-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:a9f44cd7e162ac6191491d7249cceb02b8116b0f7e847ee33f739d7cb1ea1f70"},
     {file = "Pillow-9.0.1.tar.gz", hash = "sha256:6c8bc8238a7dfdaf7a75f5ec5a663f4173f8c367e5a39f87e720495e1eed75fa"},
+]
+pillow-simd = [
+    {file = "Pillow-SIMD-9.0.0.post1.tar.gz", hash = "sha256:918541cfaa90ba3c0e1bae5da31ba1b1f52b09c0009bd90183b787af4e018263"},
 ]
 platformdirs = [
     {file = "platformdirs-2.5.1-py3-none-any.whl", hash = "sha256:bcae7cab893c2d310a711b70b24efb93334febe65f8de776ee320b517471e227"},
