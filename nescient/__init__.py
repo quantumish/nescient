@@ -56,9 +56,10 @@ class ConvNet(torch.nn.Module):
             nn.Conv2d(1, 5, (64, 64)),
             nn.Conv2d(5, 5, (32, 32)),
             nn.Conv2d(5, 5, (16, 16), stride=4),
+            nn.Conv2d(5, 5, (8, 8), stride=2),
             nn.Conv2d(5, 5, (4, 4), stride=2),
             nn.Flatten(),
-            nn.Linear(850, 512),
+            nn.Linear(750, 512),
             nn.ReLU(),
             nn.Linear(512, 256),
             nn.ReLU(),
@@ -87,7 +88,7 @@ class ConvNet(torch.nn.Module):
 class ConvNetWrapper:
     """Wrap a ConvNet() into an encrypted model."""
 
-    def __init__(self, model=ConvNet(10)):
+    def __init__(self, model=ConvNet(5)):
         """Initialize the ConvNetWrapper.
 
         Uses either the default constructor of ConvNet or an existing ConvNet.
