@@ -10,28 +10,43 @@ from torchvision.transforms import ToTensor
 
 
 class DataIterator:
+    """Iterator over the CheXpert dataset."""
+
     def __init__(self, csv_path: str, data_folder: str):
+        """Initialize iterator.
+
+        Arguments:
+        - `csv_path`: a path to the train.csv file.
+        - `data_folder`: path to the overarching dataset folder.
+        """
         self.data_folder = data_folder
         self.file = open(csv_path, "r")
         next(self.file)
 
-    def __iter__(self):        
+    def __iter__(self):
+        """Get an iterator from self.
+
+        Mostly for maintaining compatibility with Python interfaces.
+        """
         return self
 
     def __next__(self):
+        """Get next (image, label) pair from dataset.
+
+        Processes a line of the train.csv, reads the associated image,
+        and returns it as well as its labels.
+
+        Returns: a tuple of a 1x1x320x390 PyTorch tensor and a 1x14
+        PyTorch tensor.
+        """
         line = next(self.file).split(",")
         raw_image = Image.open(self.data_folder + "/" + line[0])
-        # print(raw_image.size, line[0])
-        if raw_image.size != (320, 390):
-            # print("Skipping!")
+        if raw_image.size != (320, 390):            
             return None
-        image = torch.tensor(
-            [numpy.array(
-                (Image.open(self.data_folder + "/" + line[0])).getdata(),
-                dtype=numpy.float32
-            ).reshape(1, 320, 390)]
-        )
-
+        data = raw_image.getdata()
+        image = torch.tensor(data, dtype=torch.float32)
+        image = image.reshape(1, 1, 320, 390)
+        
         def sketchy_float(i):
             try:
                 return float(i)
@@ -72,13 +87,13 @@ class ConvNet(torch.nn.Module):
         )
 
     def forward(self, x):
-        """
-        Forward propagates the model.
+        """Forward propagates the model.
 
         Arguments:
         - x: a (1, 1, 320, 390) grayscale image.
         """
         return self.model(x)
+
 
 class ConvNetWrapper:
     """Wrap a ConvNet() into an encrypted model."""
@@ -109,6 +124,3 @@ class ConvNetWrapper:
         - x: a (1, 1, 320, 390) black and white image.
         """
         self.graph.forward(x)
-
-    # def train(self, inputs, labels):
-    #     pass
