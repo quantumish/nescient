@@ -10,15 +10,15 @@ cuda = torch.device('cuda')
 batch_sz = 1
 net = nescient.ConvNet(batch_sz).to(cuda)
 criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(net.parameters(), lr=0.1)
+optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
 dataset = nescient.CheXpertDataset(
     "/home/quantumish/aux/CheXpert-v1.0-small/train.csv", "/home/quantumish/aux"
 )
 dataloader = DataLoader(dataset, batch_size=batch_sz, num_workers=16, pin_memory=True)
-total_loss = torch.zeros([1], device=cuda)
-for n in range(1):
+for n in range(10):
     iters = 0
-    max_iters = 5000
+    total_loss = torch.zeros([1], device=cuda)
+    max_iters = 100
     # losses = []
     prog_loader = tqdm.tqdm(dataloader)
     for batch in prog_loader:
@@ -27,6 +27,7 @@ for n in range(1):
         inputs = batch[0].cuda()
         labels = batch[1].cuda().reshape(batch_sz, 14)
         outputs = net(inputs)
+        # print(outputs, labels)
         loss = criterion(outputs, labels)
         total_loss[0] += loss.item()
         # losses.append(loss.item())
