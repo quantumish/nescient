@@ -38,8 +38,8 @@ def test_train_sanity():
         optimizer.zero_grad()
     assert loss.item() < orig_loss
     assert loss.item() < 0.0001
-    return loss
-    
+
+
 def test_wrapper():
     """Test if a ConvNetWrapper can be instantiated and forward propagated."""
     x = torch.rand(1, 1, 320, 390)
