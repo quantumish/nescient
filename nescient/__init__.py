@@ -26,7 +26,7 @@ class CheXpertDataset(Dataset):
 
     def __len__(self):
         """Get the size of the dataset - aka the number of images."""
-        return self.data.shape[0]
+        return 1000 # self.data.shape[0]
 
     def __getitem__(self, n):
         """Get nth (image, label) pair from dataset.
@@ -38,11 +38,13 @@ class CheXpertDataset(Dataset):
         data = raw_image.getdata()
         image = torch.FloatTensor([data])
         image = image.reshape(1, raw_image.size[0], raw_image.size[1])
+        # print(self.data.head())
         if raw_image.size[0] > raw_image.size[1]:
             image = torch.transpose(image, 1, 2)
         image = nn.functional.pad(image, (0, 390-image.shape[2]), mode="replicate")
-        label = [float(i) for i in row[5:]] 
-        label = torch.tensor([[0.0 if math.isnan(i) else float(i) for i in label]])
+        # print(row[0], row[9], row[5+7])        
+        label = float(row[13])        
+        label = torch.tensor([0.0 if label == -1.0 else label])
         return (image, label)
 
 
@@ -53,27 +55,14 @@ class ConvNet(torch.nn.Module):
         """Initialize the model."""
         super().__init__()
         self.model = nn.Sequential(
-            nn.Conv2d(1, 5, (64, 64)),
-            nn.Conv2d(5, 5, (32, 32)),
-            nn.Conv2d(5, 5, (16, 16), stride=4),
-            nn.Conv2d(5, 5, (8, 8), stride=2),
-            nn.Conv2d(5, 5, (4, 4), stride=2),
+            nn.Conv2d(1, 5, (32, 32), stride=8),
+            nn.Conv2d(5, 5, (16, 16)),
             nn.Flatten(),
-            nn.Linear(750, 512),
+            nn.Linear(3300, 512),
             nn.ReLU(),
             nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Linear(256, 256),
-            nn.ReLU(),
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Linear(128, 64),
-            nn.Sigmoid(),
-            nn.Linear(64, 64),
-            nn.Sigmoid(),
-            nn.Linear(64, 32),
-            nn.ReLU(),
-            nn.Linear(32, 14),
+            nn.Linear(256, 1),
         )
 
     def forward(self, x):
