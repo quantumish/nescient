@@ -26,7 +26,7 @@ class CheXpertDataset(Dataset):
 
     def __len__(self):
         """Get the size of the dataset - aka the number of images."""
-        return 1000 # self.data.shape[0]
+        return self.data.shape[0]
 
     def __getitem__(self, n):
         """Get nth (image, label) pair from dataset.
@@ -38,14 +38,15 @@ class CheXpertDataset(Dataset):
         data = raw_image.getdata()
         image = torch.FloatTensor([data])
         image = image.reshape(1, raw_image.size[0], raw_image.size[1])
-        # print(self.data.head())
+        # print(row)
         if raw_image.size[0] > raw_image.size[1]:
             image = torch.transpose(image, 1, 2)
         image = nn.functional.pad(image, (0, 390-image.shape[2]), mode="replicate")
-        # print(row[0], row[9], row[5+7])        
-        label = float(row[13])        
+        # print(row[0], row[9], row[5+7])
+        label = float(row["Lung Lesion"])
+
         label = torch.tensor([0.0 if label == -1.0 else label])
-        return (image, label)
+        return (image/255, label)
 
 
 class ConvNet(torch.nn.Module):
@@ -55,14 +56,25 @@ class ConvNet(torch.nn.Module):
         """Initialize the model."""
         super().__init__()
         self.model = nn.Sequential(
-            nn.Conv2d(1, 5, (32, 32), stride=8),
-            nn.Conv2d(5, 5, (16, 16)),
-            nn.Flatten(),
-            nn.Linear(3300, 512),
-            nn.ReLU(),
-            nn.Linear(512, 256),
-            nn.ReLU(),
+            nn.BatchNorm2d(1),
+            nn.Conv2d(1, 5, (16, 16)),
+            nn.GELU(),
+            # nn.Conv2d(5, 10, (8, 8)),
+            # nn.GELU(),
+            # nn.Conv2d(10, 1, (4, 4)),
+            # nn.GELU(),
+            nn.MaxPool2d(16),
+            nn.Flatten(1),
+            nn.Linear(2185, 256),
+            nn.GELU(),
             nn.Linear(256, 1),
+            #nn.GELU(),
+            #nn.Linear(128, 64),
+            #nn.GELU(),
+            #nn.Linear(64, 32),
+            #nn.GELU(),
+            #nn.Linear(32, 1),
+            nn.Sigmoid(),
         )
 
     def forward(self, x):
