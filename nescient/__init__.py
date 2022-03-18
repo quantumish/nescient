@@ -44,8 +44,7 @@ class CheXpertDataset(Dataset):
         image = nn.functional.pad(image, (0, 390-image.shape[2]), mode="replicate")
         # print(row[0], row[9], row[5+7])
         label = float(row["Lung Lesion"])
-
-        label = torch.tensor([0.0 if label == -1.0 else label])
+        label = torch.tensor([0.0 if label == -1.0 or math.isnan(label) else label])
         return (image/255, label)
 
 
@@ -57,23 +56,15 @@ class ConvNet(torch.nn.Module):
         super().__init__()
         self.model = nn.Sequential(
             nn.BatchNorm2d(1),
-            nn.Conv2d(1, 5, (16, 16)),
+            nn.Conv2d(1, 4, (16, 16)),
             nn.GELU(),
-            # nn.Conv2d(5, 10, (8, 8)),
-            # nn.GELU(),
-            # nn.Conv2d(10, 1, (4, 4)),
-            # nn.GELU(),
-            nn.MaxPool2d(16),
+            nn.MaxPool2d(32),
             nn.Flatten(1),
-            nn.Linear(2185, 256),
+            nn.Linear(396, 32),
             nn.GELU(),
-            nn.Linear(256, 1),
-            #nn.GELU(),
-            #nn.Linear(128, 64),
-            #nn.GELU(),
-            #nn.Linear(64, 32),
-            #nn.GELU(),
-            #nn.Linear(32, 1),
+            nn.Linear(32, 16),
+            nn.GELU(),
+            nn.Linear(16, 1),            
             nn.Sigmoid(),
         )
 
