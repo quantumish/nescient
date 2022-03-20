@@ -34,7 +34,7 @@ class CheXpertDataset(Dataset):
         Returns: a tuple of a 1x1x320x390 PyTorch tensor and a 1x14 PyTorch tensor.
         """
         row = self.data.iloc[n, :]
-        raw_image = Image.open("{}/{}".format(self.data_folder, row[0]))
+        raw_image = Image.open("{}/{}".format(self.data_folder, row[1]))
         data = raw_image.getdata()
         image = torch.FloatTensor([data])
         image = image.reshape(1, raw_image.size[0], raw_image.size[1])
@@ -44,6 +44,7 @@ class CheXpertDataset(Dataset):
         image = nn.functional.pad(image, (0, 390-image.shape[2]), mode="replicate")
         # print(row[0], row[9], row[5+7])
         label = float(row["Lung Lesion"])
+        # print(float(row["Lung Lesion"]))
         label = torch.tensor([0.0 if label == -1.0 or math.isnan(label) else label])
         return (image/255, label)
 
@@ -55,18 +56,33 @@ class ConvNet(torch.nn.Module):
         """Initialize the model."""
         super().__init__()
         self.model = nn.Sequential(
-            nn.BatchNorm2d(1),
-            nn.Conv2d(1, 4, (16, 16)),
-            nn.GELU(),
-            nn.MaxPool2d(32),
+        #    nn.BatchNorm2d(1),
+            # nn.Dropout(0.1),
+            nn.Conv2d(1, 16, (12, 12), stride=3),
+            nn.ReLU(),
+            nn.Conv2d(16, 8, (6, 6), stride=2),
+            nn.ReLU(),            
+            nn.MaxPool2d(4),
             nn.Flatten(1),
-            nn.Linear(396, 32),
-            nn.GELU(),
+            # nn.Dropout(0.05),
+            nn.Linear(1440, 512),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(512, 64),
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
             nn.Linear(32, 16),
-            nn.GELU(),
-            nn.Linear(16, 1),            
+            nn.ReLU(),
+            nn.Linear(16, 1),
             nn.Sigmoid(),
         )
+            # nn.Linear(128, 64),
+            # nn.ReLU(),
+            # nn.Linear(64, 32),
+            # nn.GELU(),
+            # nn.Linear(32, 16),
+            # nn.GELU(),
 
     def forward(self, x):
         """Forward propagates the model.
