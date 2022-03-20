@@ -1,9 +1,14 @@
+"""Generates the final dataset all.csv from given training CSV."""
 
 import pandas as pd
 import sys
 import math
 
-data = pd.read_csv(sys.argv[1])
+if len(sys.argv) > 1:
+    data = pd.read_csv(sys.argv[1])
+else:
+    print("You'll need a copy of the CheXpert dataset!\nYou can get a download link by filling out the form at the bottom of this page.\n\nhttps://stanfordmlgroup.github.io/competitions/chexpert/")
+    exit(0)
 
 frontal = data[data["Frontal/Lateral"] == "Frontal"]
 
