@@ -23,7 +23,7 @@ This will generate a file called `all.csv` within the current directory. To begi
 ```
 python main.py ./all.csv <path-to-data-folder>
 ```
-For an example: I installed CheXperto to `~/aux`, so that's what I would put as my data folder.
+For an example: I installed CheXpert to `~/aux`, so that's what I would put as my data folder.
 
 ## Testing
 You can run tests for `nescient` by running `tox -e ALL`. This will run `pytest` to run tests, `interrogate` to checks the documentation coverage, and `mypy` to do type checking.
