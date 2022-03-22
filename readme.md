@@ -1,7 +1,7 @@
 
 # nescient
 ## About
-A convolutional neural network designed to detect lung lesions in chest radiographs.
+A convolutional neural network designed to detect lung lesions in chest radiographs. Read the [writeup](./ml-project-1.pdf) for a more in-depth explanation!
 
 ## Usage
 Warning: this project relies on being on an Intel system with GPUs that have CUDA support!

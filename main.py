@@ -21,7 +21,7 @@ cuda = torch.device('cuda')
 
 # Hyperparameters and network setup
 batch_sz = 8
-epochs = 30
+epochs = 300
 net = nescient.ConvNet().to(cuda)
 optimizer = torch.optim.Adam(net.parameters(), lr=5e-4, weight_decay=1e-4)
 criterion = torch.nn.BCELoss()
@@ -38,6 +38,9 @@ testloader = DataLoader(test, batch_size=batch_sz, num_workers=16, pin_memory=Tr
 for n in range(epochs):
     total_loss = 0
     total_right = 0
+    false_pos = 0
+    true_pos = 0
+    false_neg = 0
     prog_loader = tqdm.tqdm(trainloader)
     prog_loader.set_description("Training")
     for batch in prog_loader:
@@ -49,14 +52,22 @@ for n in range(epochs):
         for x,i in enumerate(list(outputs)):
             if float(i) < 0.5 and float(labels[x]) == 0.0:
                 total_right += 1
+            elif float(i) > 0.5 and float(labels[x]) == 0.0:
+                false_pos += 1
             elif float(i) > 0.5 and float(labels[x]) == 1.0:
                 total_right += 1
+                true_pos += 1
+            elif float(i) < 0.5 and float(labels[x]) == 1.0:
+                false_neg += 1
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
 
     total_val_loss = 0
     total_val_right = 0
+    val_false_pos = 0
+    val_true_pos = 0
+    val_false_neg = 0
     prog_tloader = tqdm.tqdm(testloader)
     prog_tloader.set_description("Validating")
     for batch in prog_tloader:
@@ -68,8 +79,13 @@ for n in range(epochs):
         for x,i in enumerate(list(outputs)):
             if float(i) < 0.5 and float(labels[x]) == 0.0:
                 total_val_right += 1
+            elif float(i) > 0.5 and float(labels[x]) == 0.0:
+                val_false_pos += 1
             elif float(i) > 0.5 and float(labels[x]) == 1.0:
                 total_val_right += 1
+                val_true_pos += 1
+            elif float(i) < 0.5 and float(labels[x]) == 1.0:
+                val_false_neg += 1
             
     print("Epoch {}/{}: train loss {}, train acc {}%, val loss {}, val acc {}".format(
         n,
@@ -79,6 +95,14 @@ for n in range(epochs):
         round(total_val_loss/(len(test)), 3),
         round((total_val_right/len(test))*100, 3)
     ))
+    print("precision {}, recall {}, val precision {}, val recall {}".format(
+        round(true_pos/(true_pos+false_neg), 3),
+        round(true_pos/(true_pos+false_pos), 3),
+        round(val_true_pos/(val_true_pos+val_false_neg), 3),
+        round(val_true_pos/(val_true_pos+val_false_pos), 3),
+    ))
+        
+    # val precision 0.727, val recall 0.605
 
 torch.save(net.state_dict(), "./checkpoint.weights")
 encrypted_net = nescient.ConvNetWrapper(net.cpu())

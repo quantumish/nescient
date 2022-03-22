@@ -61,25 +61,15 @@ class ConvNet(torch.nn.Module):
         """Initialize the model."""
         super().__init__()
         self.model = nn.Sequential(
-            # nn.Dropout(0.1),            
-            nn.Conv2d(1, 3, (16, 16)),
-            # nn.BatchNorm2d(16),
+            nn.Conv2d(1, 8, (10, 10), stride=3),
             nn.ReLU(),
-            # nn.Conv2d(16, 8, (6, 6), stride=2),
-            # nn.ReLU(),            
-            nn.MaxPool2d(4),
-            nn.Flatten(1),
-            nn.Dropout(0.3),
-            nn.Linear(21204, 1),
-            # nn.BatchNorm1d(256),
-            # nn.ReLU(),
-            # nn.Linear(512, 64),
-            # nn.ReLU(),
-            # nn.Linear(64, 1),
-            # nn.ReLU(),
-            # nn.Linear(32, 16),
-            # nn.ReLU(),
-            # nn.Linear(16, 1),
+            nn.MaxPool2d(8),            
+            nn.Flatten(1),            
+            nn.Linear(1560, 64),
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(), 
+            nn.Linear(32, 1),
             nn.Sigmoid(),
         )
         

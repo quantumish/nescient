@@ -31,7 +31,7 @@ def test_train_sanity():
         optimizer.step()
         optimizer.zero_grad()
     assert loss.item() < orig_loss
-    assert loss.item() < 0.0001
+    assert loss.item() < 0.01
     
     
 def test_wrapper():
